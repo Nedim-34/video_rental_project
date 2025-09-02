@@ -1,21 +1,21 @@
 """ Video Rental Project"""
 
 
-# toDo
+# Define Classes
 
 
 
 
 
 
-# toDo
+# Implement Core Functions
 
 
 
 
 
 
-# toDo
+# Extensions (Group Work)
 
 
 
@@ -24,4 +24,4 @@
 
 
 
-# toDo
+# toDo section for inviduell tasks...
