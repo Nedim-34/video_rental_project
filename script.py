@@ -33,9 +33,6 @@ class VideoStore:
         self.videos = {video_id}  
         self.customers = {customer_id}  
 
-
-
-
 ### Implement Core Functions ###
 # In the VideoStore class: 1-2
 
