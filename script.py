@@ -27,7 +27,11 @@ print(customer2)
 
 
 # video store
-
+class VideoStore:
+    """Manages the collection of videos and customers."""
+    def __init__(self):
+        self.videos = {video_id}  
+        self.customers = {customer_id}  
 
 
 
