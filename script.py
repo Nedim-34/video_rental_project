@@ -4,6 +4,12 @@
 ### Define Classes ###
 # Video attributes
 
+class video_attributes:
+    def __init__(self, title, genre, video_id, available):
+        self.title = title
+        self.genre = genre
+        self.video_id = video_id
+        self.available = True
 
 
 
