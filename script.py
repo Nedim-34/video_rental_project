@@ -5,7 +5,6 @@ import colorama as clr
 
 ### Define Classes ###
 # Video attributes
-
 class Video:
     def __init__(self, title, genre, video_id):
         self.title = title
