@@ -52,10 +52,11 @@ class Customer:
         self.rented_videos = rented_videos
 
     def __str__(self):
-        return f"ID = {self.customer_id} | Name = {self.name} | Rented = {self.rented_videos}"
+        rented_titles = [video.title for video in self.rented_videos]
+        return f"ID = {self.customer_id} | Name = {self.name} | Rented = {rented_titles}"
         
-customer1 = Customer("0001", "Harvey Dent", ["The Great Gatsby", "The Matrix"])
-customer2 = Customer("0002", "Tony Sopranos", ["Your Name", "Game of Thrones", "Oldboy"])
+customer1 = Customer("0001", "Harvey Dent", [matrix])
+customer2 = Customer("0002", "Tony Sopranos", [jumanji, memento])
 
 print(customer1)
 print(customer2)
@@ -77,9 +78,45 @@ class VideoStore:
 
 
 
-# In the VideoStore class: 3-4
+### In the VideoStore class: 3-4 ###
+# rent_video(customer_id, video_id) – customer rents if available.
+    def rent_video(self, customer_id, video_id):
+        customer = self.customers.get(customer_id)
+        video = self.videos.get(video_id)
+
+        if not customer:
+            print(f"Customer {customer_id} not found.")
+            return
+        if not video:
+            print(f"Video {video_id} not found.")
+            return
+        
+        if video.available:
+            video.available = False
+            customer.rented_videos.append(video)
+            print(f"{customer.name} rented {video.title}.")
+        else:
+            print(f"{video.title} is not available.")
 
 
+# return_video(customer_id, video_id) – customer returns a video.
+    def return_video(self, customer_id, video_id):
+        customer = self.customers.get(customer_id)
+        video = self.videos.get(video_id)
+
+        if not customer:
+            print(f"Customer {customer_id} not found.")
+            return
+        if not video:
+            print(f"Video {video_id} not found.")
+            return
+        
+        if video in customer.rented_videos:
+            video.available = True
+            customer.rented_videos.remove(video)
+            print(f"{customer.name} returned {video.title}.")
+        else:
+            print(f"{customer.name} did not rent {video.title}.")
 
 
 # In the VideoStore class: 5-6
