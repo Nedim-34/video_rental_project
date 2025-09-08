@@ -163,7 +163,35 @@ class VideoStore:
 ### Extensions (Group Work) ###
 # Search feature
 
-
+    def search_video(self, title=None, genre=None, separate_lists=False):
+        match_title = []
+        match_genre = []
+        if title == None and genre == None:
+            self.list_available_videos()
+        else:
+            for id,video in self.videos.items():
+                video: Video = video
+                if title != None:
+                    lib_title = video.title.lower()
+                    vid_title = title.lower()
+                    if lib_title == vid_title or lib_title in vid_title or vid_title in lib_title:
+                        match_title.append(video)
+                if genre != None:
+                    lib_genre = video.genre.lower()
+                    vid_genre = genre.lower()
+                    if lib_genre == vid_genre or lib_genre in vid_genre or vid_genre in lib_genre:
+                        match_genre.append(video)
+        if separate_lists:  
+            return (match_title, match_genre)
+        else:
+            matches = {}
+            for vid in match_title:
+                vid:Video = vid
+                matches[vid.video_id] = vid
+            for vid in match_genre:
+                vid:Video = vid
+                matches[vid.video_id] = vid
+            return list(matches.values())
 
 
 # Late fee system
