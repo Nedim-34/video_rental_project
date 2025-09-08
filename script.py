@@ -1,15 +1,21 @@
 import colorama as clr
+import hashlib
 
 """ Video Rental Project"""
 
 
 ### Define Classes ###
+
+def gen_id(source: str):
+    return hashlib.md5(source.encode()).hexdigest()[:6]
+
+
 # Video attributes
 class Video:
-    def __init__(self, title, genre, video_id):
+    def __init__(self, title, genre):
         self.title = title
         self.genre = genre
-        self.video_id = video_id
+        self.video_id = gen_id(title+genre)
         self.available = True
 
     def __str__(self):
@@ -31,23 +37,23 @@ class Video:
             self.video_id,
             self.available)
 
-matrix = Video("M A T R I X", "Sci-Fi", "670267")
+matrix = Video("Matrix", "Sci-Fi")
 matrix.available=False
 print(matrix)
 print(repr(matrix))
 
-memento = Video("M E M E N T O", "Thriller", "195647")
+memento = Video("Memento", "Thriller")
 print(memento)
 
-jumanji = Video("J U M A N J I", "Adventure", "850985")
+jumanji = Video("Jumanji", "Adventure")
 print(jumanji)
 
 
 
 # Customer: attributes
 class Customer:
-    def __init__(self, customer_id, name, rented_videos: list):
-        self.customer_id = customer_id
+    def __init__(self, name, rented_videos=[]): #needs to be an empty list, for customer creation
+        self.customer_id = gen_id(name)
         self.name = name
         self.rented_videos = rented_videos
 
@@ -55,8 +61,8 @@ class Customer:
         rented_titles = [video.title for video in self.rented_videos]
         return f"ID = {self.customer_id} | Name = {self.name} | Rented = {rented_titles}"
         
-customer1 = Customer("0001", "Harvey Dent", [matrix])
-customer2 = Customer("0002", "Tony Sopranos", [jumanji, memento])
+customer1 = Customer("Harvey Dent", [matrix])
+customer2 = Customer("Tony Sopranos", [jumanji, memento])
 
 print(customer1)
 print(customer2)
@@ -67,15 +73,23 @@ print(customer2)
 # video store
 class VideoStore:
     """Manages the collection of videos and customers."""
-    def __init__(self, video_id, customer_id):
-        self.videos = {video_id}  
-        self.customers = {customer_id}  
+    def __init__(self, videos={}, customers={}):         #while creating new VideoStore, no data will be needed
+        self.videos = videos                             #default: empty dictionary / will be handled by add_video function
+        self.customers = customers                       #default: empty dictionary / will be handled by add_customer function
 
 
 ### Implement Core Functions ###
 # In the VideoStore class: 1-2
 
+    def add_video(self, video_obj):
+        if isinstance(video_obj, Video):
+            self.videos[video_obj.video_id] = video_obj
 
+            
+    def add_customer(self, customer_obj):
+        if isinstance(customer_obj, Customer):
+            self.customers[customer_obj.customer_id] = customer_obj
+        
 
 
 ### In the VideoStore class: 3-4 ###
@@ -146,7 +160,6 @@ class VideoStore:
             print(f"{customer.name} has not rented any videos.")
 
 
-
 ### Extensions (Group Work) ###
 # Search feature
 
@@ -172,7 +185,5 @@ class VideoStore:
 
 
 ### toDo section for inviduell tasks... ###
-
-
 
 
