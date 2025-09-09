@@ -1,4 +1,4 @@
-#import colorama as clr
+import colorama as clr
 import hashlib
 
 """ Video Rental Project"""
