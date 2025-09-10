@@ -1,5 +1,6 @@
 import colorama as clr
 import hashlib
+from datetime import datetime, timedelta
 
 """ Video Rental Project"""
 
@@ -53,20 +54,46 @@ print(jumanji)
 
 # Customer: attributes
 class Customer:
-    def __init__(self, name, rented_videos=[]): #needs to be an empty list, for customer creation
-        self.customer_id = gen_id(name)
+    _id_counter = 1  # class-level counter for sequential IDs
+
+    def __init__(self, name, rented_videos=None):
+        self.customer_id = f"{Customer._id_counter:04d}"  # 0001, 0002, ...
+        Customer._id_counter += 1
         self.name = name
-        self.rented_videos = rented_videos
+        self.rented_videos = rented_videos if rented_videos else []
 
     def __str__(self):
-        rented_titles = [video.title for video in self.rented_videos]
-        return f"ID = {self.customer_id} | Name = {self.name} | Rented = {rented_titles}"
+        x, div = 20, " : "
+        sep = "\n" + (":" * (x+2))
+        name_color = clr.Fore.CYAN
+        rented_color = clr.Fore.RED
+        none_color = clr.Fore.LIGHTGREEN_EX
+        reset = clr.Fore.RESET
+
+        # Name line
+        name_line = f"\n{'Name':>{x}}{div}{name_color}{self.name:<}{reset}"
+        # ID line
+        id_line = f"\n{'ID':>{x}}{div}{self.customer_id:<}"
+        # Rented line
+        if not self.rented_videos:
+            rented_info = f"{none_color}None{reset}"
+        else:
+            rented_info = ", ".join(
+                f"{rental['video'].title} (Due: {rental['due_date'].strftime('%b %d, %Y')})"
+                for rental in self.rented_videos
+            )
+            rented_info = f"{rented_color}{rented_info}{reset}"
+        rented_line = f"\n{'Rented':>{x}}{div}{rented_info}"
+
+        return f"{sep}{name_line}{id_line}{rented_line}{sep}"
+
         
-customer1 = Customer("Harvey Dent", [matrix])
-customer2 = Customer("Tony Sopranos", [jumanji, memento])
+customer1 = Customer("Harvey Dent")
+customer2 = Customer("Tony Sopranos")
 
 print(customer1)
 print(customer2)
+
 
 
 
@@ -95,7 +122,7 @@ class VideoStore:
 
 ### In the VideoStore class: 3-4 ###
 # rent_video(customer_id, video_id) – customer rents if available.
-    def rent_video(self, customer_id, video_id):
+    def rent_video(self, customer_id, video_id, rental_days=3):
         customer = self.customers.get(customer_id)
         video = self.videos.get(video_id)
 
@@ -108,11 +135,16 @@ class VideoStore:
         
         if video.available:
             video.available = False
-            customer.rented_videos.append(video)
-            print(f"{customer.name} rented {video.title}.")
+            rental_date = datetime.now()
+            due_date = rental_date + timedelta(days=rental_days)
+            # storing as dict instead of plain video
+            customer.rented_videos.append({
+                "video": video,
+                "rental_date": rental_date,
+                "due_date": due_date})
+            print(f"{customer.name} rented {video.title}. Due on {due_date.date()}.")
         else:
             print(f"{video.title} is not available.")
-
 
 # return_video(customer_id, video_id) – customer returns a video.
     def return_video(self, customer_id, video_id):
@@ -126,10 +158,18 @@ class VideoStore:
             print(f"Video {video_id} not found.")
             return
         
-        if video in customer.rented_videos:
+         # Find the rental dict for this video
+        rental_entry = next((rental for rental in customer.rented_videos if rental["video"].video_id == video_id), None)
+
+        if rental_entry:
             video.available = True
-            customer.rented_videos.remove(video)
-            print(f"{customer.name} returned {video.title}.")
+            customer.rented_videos.remove(rental_entry)
+            fee = self.calculate_late_fee(rental_entry["due_date"])
+            if fee > 0:
+                print(f"{customer.name} returned {video.title}. LATE! Fee: €{fee:.2f}")
+            else:
+                    print(f"{customer.name} returned {video.title} on time.")
+                    return
         else:
             print(f"{customer.name} did not rent {video.title}.")
 
@@ -196,7 +236,12 @@ class VideoStore:
 
 
 # Late fee system
-
+    def calculate_late_fee(self, due_date, fee_per_day=1.50):
+        today = datetime.now()
+        if today > due_date:
+            days_late = (today - due_date).days
+            return days_late * fee_per_day
+        return 0.0
 
 
 
@@ -317,6 +362,21 @@ store.add_video(jumanji)
 # Add customers if needed
 store.add_customer(customer1)
 store.add_customer(customer2)
+
+### rent and return simulation in order to test late fee system ###
+
+# Rent Jumanji to customer1 for 3 days
+store.rent_video(customer1.customer_id, jumanji.video_id, rental_days=3)
+# Check status
+print(jumanji)  # Available should be False
+print(customer1) # Should list Jumanji with due date
+
+# Return Jumanji
+store.return_video(customer1.customer_id, jumanji.video_id)
+
+# Check status again
+print(jumanji)      # Available should now be True
+print(customer1)    # Rented list should no longer include Jumanji
 
 # Start the main menu
 if __name__ == "__main__":
