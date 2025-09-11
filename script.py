@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 ### Define Classes ###
 
 def gen_id(source: str):
-    return hashlib.md5(source.encode()).hexdigest()[:6]
+    return hashlib.md5(source.strip().lower().encode()).hexdigest()[:6]
 
 
 # Video attributes
@@ -41,14 +41,14 @@ class Video:
 
 matrix = Video("Matrix", "Sci-Fi")
 matrix.available=False
-print(matrix)
-print(repr(matrix))
+#print(matrix)
+#print(repr(matrix))
 
 memento = Video("Memento", "Thriller")
-print(memento)
+#print(memento)
 
 jumanji = Video("Jumanji", "Adventure")
-print(jumanji)
+#print(jumanji)
 
 
 
@@ -91,8 +91,8 @@ class Customer:
 customer1 = Customer("Harvey Dent")
 customer2 = Customer("Tony Sopranos")
 
-print(customer1)
-print(customer2)
+#print(customer1)
+#print(customer2)
 
 
 
@@ -234,6 +234,11 @@ class VideoStore:
                 matches[vid.video_id] = vid
             return list(matches.values())
 
+# Collections    
+    def get_video(self, video_id):
+        return self.videos.get(video_id)
+
+
 
 # Late fee system
     def calculate_late_fee(self, due_date, fee_per_day=1.50):
@@ -358,6 +363,11 @@ store.add_video(matrix)
 store.add_video(memento)
 store.add_video(jumanji)
 
+# Quick video lookup by video_id
+vid = store.get_video("e4ca63")
+vid2 = store.get_video(gen_id(" mAtrix"+ "sci-Fi")) #in case you have no video_id / using title + genre
+#print(f"\n Video found by video_id: ",vid)
+#print(f"\n Video found by video_id: ",vid2)
 
 # Add customers if needed
 store.add_customer(customer1)
@@ -368,15 +378,15 @@ store.add_customer(customer2)
 # Rent Jumanji to customer1 for 3 days
 store.rent_video(customer1.customer_id, jumanji.video_id, rental_days=3)
 # Check status
-print(jumanji)  # Available should be False
-print(customer1) # Should list Jumanji with due date
+#print(jumanji)  # Available should be False
+#print(customer1) # Should list Jumanji with due date
 
 # Return Jumanji
 store.return_video(customer1.customer_id, jumanji.video_id)
 
 # Check status again
-print(jumanji)      # Available should now be True
-print(customer1)    # Rented list should no longer include Jumanji
+#print(jumanji)      # Available should now be True
+#print(customer1)    # Rented list should no longer include Jumanji
 
 # Start the main menu
 if __name__ == "__main__":
