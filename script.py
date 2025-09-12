@@ -86,9 +86,7 @@ class Customer:
 
         return f"{sep}{name_line}{id_line}{rented_line}{sep}"
 
-    
-customer1 = Customer("Harvey Dent")
-customer2 = Customer("Tony Sopranos")
+
 
 #print(customer1)
 #print(customer2)
@@ -611,6 +609,24 @@ if __name__ == "__main__":
     store.add_customer(customer5)
     store.add_customer(customer6)
     store.add_customer(customer7)
+
+    # --- Add past rentals for testing late fees ---
+    test_rentals = [
+        (customer1, "Matrix", 2, 3),     # rented 2 days ago, due in 3 days → on time
+        (customer2, "Memento", 4, 3),    # rented 4 days ago, due 3 days later → 1 day late
+        (customer3, "Jumanji", 5, 3),    # rented 5 days ago, due 3 days later → 2 days late
+    ]
+
+    for cust, title, days_ago, rental_days in test_rentals:
+        video = store.search_video(title=title)[0]  # find video by title
+        video.available = False
+        rental_date = datetime.now() - timedelta(days=days_ago)
+        due_date = rental_date + timedelta(days=rental_days)
+        cust.rented_videos.append({
+            "video": video,
+            "rental_date": rental_date,
+            "due_date": due_date
+        })
 
     print("\n -----------------------------------------------------------")
     print("|                                                            |")
