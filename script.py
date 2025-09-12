@@ -38,6 +38,7 @@ class Video:
             self.available)
 
 
+
 matrix = Video("Matrix", "Sci-Fi")
 matrix.available=False
 #print(matrix)
@@ -48,6 +49,7 @@ memento = Video("Memento", "Thriller")
 
 jumanji = Video("Jumanji", "Adventure")
 #print(jumanji)
+
 
 
 
@@ -87,11 +89,8 @@ class Customer:
         return f"{sep}{name_line}{id_line}{rented_line}{sep}"
 
 
-
 #print(customer1)
 #print(customer2)
-
-
 
 # video store
 class VideoStore:
@@ -101,7 +100,6 @@ class VideoStore:
         self.customers = customers
 
 ### Implement Core Functions ###
-# In the VideoStore class: 1-2
 
     def add_video(self, video_obj):
         if isinstance(video_obj, Video):
@@ -130,15 +128,27 @@ class VideoStore:
                 return video
         
         return None
+        
+    def _find_customer(self, identifier):
+        """Helper function to find a customer by ID or name (case-insensitive)."""
+        # Try to find by customer_id first
+        customer = self.customers.get(identifier)
+        if customer:
+            return customer
+        
+        # If not found by ID, try to find by name
+        for customer in self.customers.values():
+            if customer.name.lower() == identifier.lower():
+                return customer
+        
+        return None
 
-### In the VideoStore class: 3-4 ###
-# rent_video(customer_id, video_id) – customer rents if available.
-    def rent_video(self, customer_id, video_identifier, rental_days=3):
-        customer = self.customers.get(customer_id)
+    def rent_video(self, customer_identifier, video_identifier, rental_days=3):
+        customer = self._find_customer(customer_identifier)
         video = self._find_video(video_identifier)
 
         if not customer:
-            print(clr.Fore.RED + f"Customer {customer_id} not found." + clr.Fore.RESET)
+            print(clr.Fore.RED + f"Customer '{customer_identifier}' not found." + clr.Fore.RESET)
             return
         if not video:
             print(clr.Fore.RED + f"Video '{video_identifier}' not found." + clr.Fore.RESET)
@@ -157,19 +167,17 @@ class VideoStore:
         else:
             print(clr.Fore.RED + f"{video.title} is not available." + clr.Fore.RESET)
 
-# return_video(customer_id, video_id) – customer returns a video.
-    def return_video(self, customer_id, video_identifier):
-        customer = self.customers.get(customer_id)
+    def return_video(self, customer_identifier, video_identifier):
+        customer = self._find_customer(customer_identifier)
         video_to_return = self._find_video(video_identifier)
 
         if not customer:
-            print(clr.Fore.RED + f"Customer {customer_id} not found." + clr.Fore.RESET)
+            print(clr.Fore.RED + f"Customer '{customer_identifier}' not found." + clr.Fore.RESET)
             return
         if not video_to_return:
             print(clr.Fore.RED + f"Video '{video_identifier}' not found." + clr.Fore.RESET)
             return
 
-        # Find the rental dict for this video
         rental_entry = next((rental for rental in customer.rented_videos if rental["video"].video_id == video_to_return.video_id), None)
 
         if rental_entry:
@@ -183,7 +191,6 @@ class VideoStore:
         else:
             print(clr.Fore.YELLOW + f"{customer.name} did not rent {video_to_return.title}." + clr.Fore.RESET)
 
-# In the VideoStore class: 5-6
     def list_all_customers(self):
         """Lists all customers with their ID and name."""
         print("\n--- All Customers ---")
@@ -207,24 +214,22 @@ class VideoStore:
         if available_count == 0:
             print("There are currently no videos available.")
 
-    def list_customer_videos(self, customer_id):
+    def list_customer_videos(self, customer_identifier):
         """Shows a list of videos a customer has rented."""
-        customer = self.customers.get(customer_id)
+        customer = self._find_customer(customer_identifier)
         if not customer:
-            print(clr.Fore.RED + f"Error: Customer with ID {customer_id} not found." + clr.Fore.RESET)
+            print(clr.Fore.RED + f"Error: Customer with name or ID '{customer_identifier}' not found." + clr.Fore.RESET)
             return
 
-        print(f"\n--- Videos Rented by {customer.name} ---")
+        print(f"\n    --- Videos Rented by {customer.name} ---")
         if customer.rented_videos:
             for video_entry in customer.rented_videos:
                 video = video_entry['video']
+                print("----------------------------------------------")
                 print(f"ID: {video.video_id} | Title: {video.title} | Genre: {video.genre}")
+                print("----------------------------------------------")
         else:
             print(f"{customer.name} has not rented any videos.")
-
-
-### Extensions (Group Work) ###
-# Search feature
 
     def search_video(self, title=None, genre=None, separate_lists=False):
         match_title = []
@@ -249,12 +254,12 @@ class VideoStore:
             matches = {vid.video_id: vid for vid in match_title + match_genre}
             return list(matches.values())
 
-# Collections    
     def get_video(self, video_id):
         return self.videos.get(video_id)
 
-    
+
 # Late fee system
+
     def calculate_late_fee(self, due_date, fee_per_day=1.50):
         """Calculates a late fee based on the due date."""
         today = datetime.now()
@@ -263,51 +268,42 @@ class VideoStore:
             return days_late * fee_per_day
         return 0.0
 
-
-# Ratings system
     def rate_video(self):
         """Allows a user to rate a video and shows the average rating."""
         while True:
             self.list_all_videos()
-            user_input = input("Enter the number of the video you want to rate (or 'q' to quit): ").strip()
+            video_identifier = input("Enter the title or ID of the video you want to rate (or 'q' to quit): ").strip()
 
-            if user_input.lower() == 'q':
+            if video_identifier.lower() == 'q':
                 print(clr.Fore.GREEN + "Thank you for using our rating system! We hope to see you again soon." + clr.Fore.RESET)
                 return
 
-            if not user_input.isdigit():
-                print(clr.Fore.RED + "Invalid input. Please enter a number." + clr.Fore.RESET)
+            selected_video = self._find_video(video_identifier)
+
+            if not selected_video:
+                print(clr.Fore.RED + "Invalid input. Video not found. Please enter a valid title or ID." + clr.Fore.RESET)
                 continue
             
-            try:
-                choice = int(user_input)
-                video_list = list(self.videos.values())
-                if 1 <= choice <= len(video_list):
-                    selected_video = video_list[choice - 1]
-                    username = input("Enter your username: ").strip()
-                    if not username:
-                        print(clr.Fore.RED + "Username cannot be empty." + clr.Fore.RESET)
-                        continue
-                    
-                    rating_input = input(f"Enter your rating for '{selected_video.title}' (1-5): ").strip()
+            username = input("Enter your username: ").strip()
+            if not username:
+                print(clr.Fore.RED + "Username cannot be empty." + clr.Fore.RESET)
+                continue
+            
+            rating_input = input(f"Enter your rating for '{selected_video.title}' (1-5): ").strip()
 
-                    if not rating_input.isdigit():
-                        print(clr.Fore.RED + "Invalid input. Please enter a number between 1 and 5." + clr.Fore.RESET)
-                        continue
-                    
-                    rating = int(rating_input)
-                    if 1 <= rating <= 5:
-                        selected_video.ratings[username] = rating
-                        print(clr.Fore.CYAN + f"Thank you, {username}, for rating '{selected_video.title}'!" + clr.Fore.RESET)
-                        self.show_average_rating(selected_video)
-                    else:
-                        print(clr.Fore.RED + "Invalid rating. Please enter a number between 1 and 5." + clr.Fore.RESET)
-                else:
-                    print(clr.Fore.RED + "Invalid number. Please choose a video from the list." + clr.Fore.RESET)
-            except ValueError:
-                print(clr.Fore.RED + "Invalid input. Please enter a valid number." + clr.Fore.RESET)
-            except Exception as e:
-                print(f"An unexpected error occurred: {e}")
+            if not rating_input.isdigit():
+                print(clr.Fore.RED + "Invalid input. Please enter a number between 1 and 5." + clr.Fore.RESET)
+                continue
+            
+            rating = int(rating_input)
+            if 1 <= rating <= 5:
+                selected_video.ratings[username] = rating
+                print(clr.Fore.CYAN + f"Thank you, {username}, for rating '{selected_video.title}'!" + clr.Fore.RESET)
+                self.show_average_rating(selected_video)
+            else:
+                print(clr.Fore.RED + "Invalid rating. Please enter a number between 1 and 5." + clr.Fore.RESET)
+            
+            break
 
     def show_average_rating(self, video):
         """Calculates and prints the average rating for a given video."""
@@ -319,15 +315,16 @@ class VideoStore:
         print(clr.Fore.GREEN + f"Average rating for '{video.title}': {average:.2f} out of 5 stars based on {len(video.ratings)} votes." + clr.Fore.RESET)
 
     def list_all_videos(self):
-        """Lists all videos with a number for selection."""
+        """Lists all videos without numbers."""
         print("\n--- All Videos ---")
-        video_list = list(self.videos.values())
-        if not video_list:
+        if not self.videos:
             print("No videos in the store.")
             return
 
-        for i, video in enumerate(video_list):
+        for video in self.videos.values():
             print(f"ID: {video.video_id} | Title: {video.title} | Genre: {video.genre}")
+        print("-------------------------------------------------")
+
 
     def show_all_average_ratings(self):
         """Shows the average rating for all videos."""
@@ -343,18 +340,19 @@ class VideoStore:
             else:
                 print(f"'{video.title}': No ratings yet.")
 
-# Menu System
+### Menu System ###
     def start_menu(self):
         """The main entry point for the video store application."""
         while True:
-            print("\n--- 📼 Welcome to Video Store 📼 ---")
-            print("\n1. Video Management")
-            print("2. Customer Management")
-            print("3. Rent/Return Videos")
-            print("4. Search & List")
-            print("5. Video Ratings")
-            print("6. Exit")
-            print("-----------------------------------------------")
+            print("\n --- 📼 Welcome to Video Store 📼 ---")
+            print(" –––––––––––––––––––––––––––––––––––– ") 
+            print("| 1. Video Management                |")
+            print("| 2. Customer Management             |")
+            print("| 3. Rent/Return Videos              |")
+            print("| 4. Search & List                   |")
+            print("| 5. Video Ratings                   |")
+            print("| 6. Exit                            |")
+            print(" ------------------------------------")
             choice = input("\nEnter your choice: ").strip()
             print()
             
@@ -371,7 +369,10 @@ class VideoStore:
             elif choice == '6':
                 confirm = input("‼️ Are you sure you want to exit? (y/n): ").strip().lower()
                 if confirm == 'y':
-                    print("👋 Goodbye!")
+                    print("\n -----------------------------")
+                    print("| 👋 Goodbye! See you again!  |")
+                    print(" -----------------------------")
+                    print()
                     break
                 elif confirm == 'n':
                     continue
@@ -383,7 +384,7 @@ class VideoStore:
     def video_management_menu(self):
         """Menu for managing video rentals."""
         while True:
-            print("\n--- 🎬 Video Management Menu 🎬 ---")
+            print("\n  --- 🎬 Video Management Menu 🎬 ---")
             print("–––––––––––––––––––––––––––––––––––––––") 
             print("| 1. Add a new video                  |")
             print("| 2. List of all videos               |")
@@ -407,7 +408,7 @@ class VideoStore:
     def customer_management_menu(self):
         """Menu for managing video rentals."""
         while True:
-            print("\n  --- 👤 Customer Management Menu 👤 ---")
+            print("\n --- 👤 Customer Management Menu 👤 ---")
             print("–––––––––––––––––––––––––––––––––––––––") 
             print("| 1. Add a new customer               |")
             print("| 2. List all customers               |")
@@ -422,8 +423,8 @@ class VideoStore:
                 self.list_all_customers()
             elif choice == '3':
                 self.list_all_customers()
-                customer_id = input("Enter customer ID: ").strip()
-                self.list_customer_videos(customer_id)
+                customer_identifier = input("Enter customer name or ID: ").strip()
+                self.list_customer_videos(customer_identifier)
             elif choice == '4':
                 break
             else:
@@ -433,7 +434,7 @@ class VideoStore:
     def rent_return_menu(self):
         """Menu for managing video rentals."""
         while True:
-            print("\n  --- 📀 Rent & Return Menu 📀 ---")
+            print("\n   --- 📀 Rent & Return Menu 📀 ---")
             print("–––––––––––––––––––––––––––––––––––––––") 
             print("| 1. Rent a video                     |")
             print("| 2. Return a video                   |")
@@ -443,20 +444,19 @@ class VideoStore:
 
             if choice == '1':
                 self.list_all_customers()
-                customer_id = input("Enter customer ID to rent: ").strip()
-                video_identifier = input("Enter video name or ID to rent: ").strip()
-                self.rent_video(customer_id, video_identifier)
+                customer_identifier = input("Enter customer name or ID to rent: ").strip()
+                video_identifier = input("Enter video title or ID to rent: ").strip()
+                self.rent_video(customer_identifier, video_identifier)
             elif choice == '2':
                 self.list_all_customers()
-                customer_id = input("Enter customer ID to return: ").strip()
-                self.list_customer_videos(customer_id)
-                video_identifier = input("Enter video name or ID to return: ").strip()
-                self.return_video(customer_id, video_identifier)
+                customer_identifier = input("Enter customer name or ID to return: ").strip()
+                self.list_customer_videos(customer_identifier)
+                video_identifier = input("Enter video title or ID to return: ").strip()
+                self.return_video(customer_identifier, video_identifier)
             elif choice == '3':
                 break
             else:
                 print(clr.Fore.RED + "🚫 Invalid choice. Please enter a number from 1 to 3." + clr.Fore.RESET)
-
 
 # Rent Jumanji to customer1 for 3 days
         store.rent_video(customer1.customer_id, jumanji.video_id, rental_days=3)
@@ -464,16 +464,15 @@ class VideoStore:
 #print(jumanji)  # Available should be False
 #print(customer1) # Should list Jumanji with due date
 
-
     def search_menu(self):
         """Menu for searching videos."""
         while True:
-            print("\n     --- 🔎 Search Menu 🔎 ---")
+            print("\n       --- 🔎 Search Menu 🔎 ---")
             print("–––––––––––––––––––––––––––––––––––––––") 
             print("| 1. Search by title                  |")
             print("| 2. Search by genre                  |")
             print("| 3. Available videos                 |")
-            print("| 4. Rented videos                    |")
+            print("| 4. Rented videos by customer        |")
             print("| 5. Back to Main Menu                |")
             print("–––––––––––––––––––––––––––––––––––––––") 
             choice = input("\nEnter your choice: ").strip()
@@ -500,16 +499,20 @@ class VideoStore:
                 self.list_available_videos()
             elif choice == '4':
                 self.list_all_customers()
-                customer_id = input("Enter customer ID: ").strip()
-                self.list_customer_videos(customer_id)
+                customer_identifier = input("Enter customer name or ID: ").strip()
+                self.list_customer_videos(customer_identifier)
             elif choice == '5':
                 break
             else:
+
+                print(clr.Fore.RED + "🚫 Invalid choice. Please enter a number from 1 to 5." + clr.Fore.RESET)
+
                 print(clr.Fore.RED + "🚫 Invalid choice. Please enter a number from 1 to 9." + clr.Fore.RESET)
 
 # Check status again
 #print(jumanji)      # Available should now be True
 #print(customer1)    # Rented list should no longer include Jumanji
+
 
 
 
@@ -642,12 +645,4 @@ if __name__ == "__main__":
     # Start the main application menu
     store.start_menu()
 
-
-
-
-
-
-
-### toDo section for inviduell tasks... ###
-
-
+    ########
