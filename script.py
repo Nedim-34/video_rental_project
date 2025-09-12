@@ -389,7 +389,7 @@ class VideoStore:
             print("–––––––––––––––––––––––––––––––––––––––") 
             print("| 1. Add a new video                  |")
             print("| 2. List of all videos               |")
-            print("| 3. List all available videos        |")
+            print("| 3. Available videos                 |")
             print("| 4. Back to Main Menu                |")
             print("–––––––––––––––––––––––––––––––––––––––") 
             choice = input("\nEnter your choice: ").strip()
@@ -413,7 +413,7 @@ class VideoStore:
             print("–––––––––––––––––––––––––––––––––––––––") 
             print("| 1. Add a new customer               |")
             print("| 2. List all customers               |")
-            print("| 3. List a customer's rented videos  |")
+            print("| 3. Rented videos by customer        |")
             print("| 4. Back to Main Menu                |")
             print("–––––––––––––––––––––––––––––––––––––––") 
             choice = input("\nEnter your choice: ").strip()
@@ -461,7 +461,7 @@ class VideoStore:
 
 
 # Rent Jumanji to customer1 for 3 days
-store.rent_video(customer1.customer_id, jumanji.video_id, rental_days=3)
+        store.rent_video(customer1.customer_id, jumanji.video_id, rental_days=3)
 # Check status
 #print(jumanji)  # Available should be False
 #print(customer1) # Should list Jumanji with due date
@@ -581,7 +581,13 @@ if __name__ == "__main__":
     store.add_video(Video("Matrix", "Sci-Fi"))
     store.add_video(Video("Memento", "Thriller"))
     store.add_video(Video("Jumanji", "Adventure"))
-    
+    store.add_video(Video("Inception", "Sci-Fi"))
+    store.add_video(Video("The Godfather", "Crime"))
+    store.add_video(Video("Friends", "Comedy"))
+    store.add_video(Video("Breaking Bad", "Drama"))
+    store.add_video(Video("Interstellar", "Sci-Fi"))
+    store.add_video(Video("The Dark Knight", "Action"))
+    store.add_video(Video("The Lion King", "Animation"))
     
     # Quick video lookup by video_id
     vid = store.get_video("e4ca63")
@@ -593,8 +599,18 @@ if __name__ == "__main__":
     # Initial customers
     customer1 = Customer("Harvey Dent")
     customer2 = Customer("Tony Sopranos")
+    customer3 = Customer("Diana Prince" )
+    customer4 = Customer("Natasha Romanoff")
+    customer5 = Customer("Steve Rogers")
+    customer6 = Customer("Barry Allen")
+    customer7 = Customer("Arthur Curry")
     store.add_customer(customer1)
     store.add_customer(customer2)
+    store.add_customer(customer3)
+    store.add_customer(customer4)
+    store.add_customer(customer5)
+    store.add_customer(customer6)
+    store.add_customer(customer7)
 
     print("\n -----------------------------------------------------------")
     print("|                                                            |")
