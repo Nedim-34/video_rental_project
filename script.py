@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 ### Define Classes ###
 
 def gen_id(source: str):
-    return hashlib.md5(source.encode()).hexdigest()[:6]
+    return hashlib.md5(source.strip().lower().encode()).hexdigest()[:6]
 
 # Video attributes
 class Video:
@@ -36,6 +36,20 @@ class Video:
             self.genre,
             self.video_id,
             self.available)
+
+
+matrix = Video("Matrix", "Sci-Fi")
+matrix.available=False
+#print(matrix)
+#print(repr(matrix))
+
+memento = Video("Memento", "Thriller")
+#print(memento)
+
+jumanji = Video("Jumanji", "Adventure")
+#print(jumanji)
+
+
 
 # Customer: attributes
 class Customer:
@@ -71,6 +85,15 @@ class Customer:
         rented_line = f"\n{'Rented':>{x}}{div}{rented_info}"
 
         return f"{sep}{name_line}{id_line}{rented_line}{sep}"
+
+    
+customer1 = Customer("Harvey Dent")
+customer2 = Customer("Tony Sopranos")
+
+#print(customer1)
+#print(customer2)
+
+
 
 # video store
 class VideoStore:
@@ -231,8 +254,9 @@ class VideoStore:
 # Collections    
     def get_video(self, video_id):
         return self.videos.get(video_id)
+
     
-# Late fee system    
+# Late fee system
     def calculate_late_fee(self, due_date, fee_per_day=1.50):
         """Calculates a late fee based on the due date."""
         today = datetime.now()
@@ -381,6 +405,7 @@ class VideoStore:
             else:
                 print(clr.Fore.RED + "🚫 Invalid choice. Please enter a number from 1 to 4." + clr.Fore.RESET)
 
+
     def customer_management_menu(self):
         """Menu for managing video rentals."""
         while True:
@@ -405,6 +430,7 @@ class VideoStore:
                 break
             else:
                 print(clr.Fore.RED + "🚫 Invalid choice. Please enter a number from 1 to 4." + clr.Fore.RESET)
+
 
     def rent_return_menu(self):
         """Menu for managing video rentals."""
@@ -432,6 +458,13 @@ class VideoStore:
                 break
             else:
                 print(clr.Fore.RED + "🚫 Invalid choice. Please enter a number from 1 to 3." + clr.Fore.RESET)
+
+
+# Rent Jumanji to customer1 for 3 days
+store.rent_video(customer1.customer_id, jumanji.video_id, rental_days=3)
+# Check status
+#print(jumanji)  # Available should be False
+#print(customer1) # Should list Jumanji with due date
 
 
     def search_menu(self):
@@ -475,6 +508,11 @@ class VideoStore:
                 break
             else:
                 print(clr.Fore.RED + "🚫 Invalid choice. Please enter a number from 1 to 9." + clr.Fore.RESET)
+
+# Check status again
+#print(jumanji)      # Available should now be True
+#print(customer1)    # Rented list should no longer include Jumanji
+
 
 
     def add_video_menu(self):
